@@ -1,3 +1,4 @@
+package com.example;
 
 import java.time.Instant;
 import org.jetbrains.annotations.NotNull;

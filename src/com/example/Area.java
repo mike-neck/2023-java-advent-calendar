@@ -1,3 +1,5 @@
+package com.example;
+
 import org.jetbrains.annotations.NotNull;
 
 sealed interface Area {

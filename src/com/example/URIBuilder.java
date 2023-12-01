@@ -1,3 +1,4 @@
+package com.example;
 
 import java.net.URI;
 import org.jetbrains.annotations.NotNull;
