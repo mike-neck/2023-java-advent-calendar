@@ -66,25 +66,8 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         return saveNewWaitingList(customerId, productId, area, campaignCode, priority, now);
       } else {
-        // ウェイティングリストが終了している場合は予約として扱う
-        Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
-        if (campaignCode != null) {
-          CampaignRewardRequest request =
-              new CampaignRewardRequest(
-                  productId,
-                  Reference.of(Booking.class, booking.getId()),
-                  priority,
-                  campaignCode,
-                  now);
-          campaignEvents.createCampaignReward(request);
-        }
-        return uriBuilder
-            .name(PRODUCTS)
-            .value(productId)
-            .name("contracts")
-            .name(BOOKINGS)
-            .value(booking.getId())
-            .build();
+        return saveAsNewBookingWithCampaignReward(
+            customerId, productId, area, campaignCode, now, priority);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
@@ -133,6 +116,31 @@ public class WaitingListLogic {
         }
       }
     }
+  }
+
+  @NotNull
+  private URI saveAsNewBookingWithCampaignReward(
+      @NotNull CustomerId customerId,
+      @NotNull ProductId productId,
+      @NotNull Area area,
+      @Nullable CampaignCode campaignCode,
+      @NotNull Instant now,
+      @NotNull CampaignPriority priority) {
+    // ウェイティングリストが終了している場合は予約として扱う
+    Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
+    if (campaignCode != null) {
+      CampaignRewardRequest request =
+          new CampaignRewardRequest(
+              productId, Reference.of(Booking.class, booking.getId()), priority, campaignCode, now);
+      campaignEvents.createCampaignReward(request);
+    }
+    return uriBuilder
+        .name(PRODUCTS)
+        .value(productId)
+        .name("contracts")
+        .name(BOOKINGS)
+        .value(booking.getId())
+        .build();
   }
 
   @NotNull
