@@ -64,7 +64,36 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
-        return registerNewWaitingList(customerId, productId, area, campaignCode, priority, now);
+        // ウェイティングリストに初めて人が並ぶ場合
+        CampaignRule rule = campaignEvents.findRule(productId, area);
+        if (rule == null) {
+          CampaignRuleId campaignRuleId = idGenerator.generateNew(CampaignRuleId.class);
+          rule =
+              campaignEvents.createNewRule(
+                  productId, area, campaignRuleId, CampaignRule.getDefault());
+        }
+        WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
+        WaitingRequest waitingRequest =
+            rule.createRequest(waitingListId, customerId, productId, priority, area, now);
+        WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
+        if (campaignCode != null) {
+          CampaignRewardRequest request =
+              new CampaignRewardRequest(
+                  productId,
+                  Reference.of(WaitingList.class, waiting.getId()),
+                  priority,
+                  campaignCode,
+                  now);
+          campaignEvents.createCampaignReward(request);
+        }
+        return uriBuilder
+            .name(PRODUCTS)
+            .value(productId)
+            .name(Area.PATH_PARAM)
+            .value(area)
+            .name(WAITING_LIST)
+            .value(waiting.getId())
+            .build();
       } else {
         // ウェイティングリストが終了している場合は予約として扱う
         Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
@@ -133,39 +162,5 @@ public class WaitingListLogic {
         }
       }
     }
-  }
-
-  @NotNull
-  private URI registerNewWaitingList(@NotNull CustomerId customerId, @NotNull ProductId productId, @NotNull Area area, @Nullable CampaignCode campaignCode, CampaignPriority priority, Instant now) {
-    // ウェイティングリストに初めて人が並ぶ場合
-    CampaignRule rule = campaignEvents.findRule(productId, area);
-    if (rule == null) {
-      CampaignRuleId campaignRuleId = idGenerator.generateNew(CampaignRuleId.class);
-      rule =
-          campaignEvents.createNewRule(
-                  productId, area, campaignRuleId, CampaignRule.getDefault());
-    }
-    WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
-    WaitingRequest waitingRequest =
-        rule.createRequest(waitingListId, customerId, productId, priority, area, now);
-    WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
-    if (campaignCode != null) {
-      CampaignRewardRequest request =
-          new CampaignRewardRequest(
-                  productId,
-              Reference.of(WaitingList.class, waiting.getId()),
-                  priority,
-                  campaignCode,
-                  now);
-      campaignEvents.createCampaignReward(request);
-    }
-    return uriBuilder
-            .name(PRODUCTS)
-            .value(productId)
-            .name(Area.PATH_PARAM)
-            .value(area)
-            .name(WAITING_LIST)
-            .value(waiting.getId())
-            .build();
   }
 }
