@@ -64,7 +64,16 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
-        return saveNewWaitingList(customerId, productId, area, campaignCode, priority, now);
+        return saveNewWaitingList(
+            campaignEvents,
+            idGenerator,
+            uriBuilder,
+            customerId,
+            productId,
+            area,
+            campaignCode,
+            priority,
+            now);
       } else {
         return saveAsNewBookingWithCampaignReward(
             customerId, productId, area, campaignCode, now, priority);
@@ -80,7 +89,10 @@ public class WaitingListLogic {
   }
 
   @NotNull
-  private URI saveNewWaitingList(
+  static URI saveNewWaitingList(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull IdGenerator idGenerator,
+      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
