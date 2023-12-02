@@ -73,23 +73,33 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         return addNewWaitingList(
             customerId, productId, area, campaignCode, waitingList, priority, now);
-      } else { // Waiting List を締め切った場合
-        CampaignRule rule = campaignEvents.findRule(productId, area);
-        if (rule != null && rule.acceptsBookingAfterCampaignDeadline()) {
-          Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
-          return uriBuilder
-              .name(PRODUCTS)
-              .value(productId)
-              .name("contracts")
-              .name(BOOKINGS)
-              .value(booking.getId())
-              .build();
-        } else {
-          campaignEvents.saveExpiredCampaignApplication(
-              customerId, productId, area, now, campaignCode);
-          return uriBuilder.name(PRODUCTS).value(productId).name("expired").build();
-        }
+      } else {
+        return saveAsBookingIfAvailable(customerId, productId, area, campaignCode, now);
       }
+    }
+  }
+
+  @NotNull
+  private URI saveAsBookingIfAvailable(
+      @NotNull CustomerId customerId,
+      @NotNull ProductId productId,
+      @NotNull Area area,
+      @Nullable CampaignCode campaignCode,
+      @NotNull Instant now) {
+    // Waiting List を締め切った場合
+    CampaignRule rule = campaignEvents.findRule(productId, area);
+    if (rule != null && rule.acceptsBookingAfterCampaignDeadline()) {
+      Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
+      return uriBuilder
+          .name(PRODUCTS)
+          .value(productId)
+          .name("contracts")
+          .name(BOOKINGS)
+          .value(booking.getId())
+          .build();
+    } else {
+      campaignEvents.saveExpiredCampaignApplication(customerId, productId, area, now, campaignCode);
+      return uriBuilder.name(PRODUCTS).value(productId).name("expired").build();
     }
   }
 
