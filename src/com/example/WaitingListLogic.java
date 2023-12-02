@@ -1,6 +1,5 @@
 package com.example;
 
-import com.example.campaign.CampaignApplicationStrategyFactory;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Instant;
@@ -36,11 +35,13 @@ public class WaitingListLogic {
     this.campaignEvents = campaignEvents;
     this.salesStore = salesStore;
     this.campaignApplicationStrategyFactory =
-        new CampaignApplicationStrategyFactory(campaignEvents, idGenerator, salesStore, uriBuilder);
+        CampaignApplicationStrategyFactory.getInstance(
+            campaignEvents, idGenerator, salesStore, uriBuilder);
   }
 
   public static final @NotNull PathParam<ProductId> PRODUCTS = PathParam.ofId("products");
-  public static final @NotNull PathParam<WaitingListId> WAITING_LIST = PathParam.ofId("waiting-list");
+  public static final @NotNull PathParam<WaitingListId> WAITING_LIST =
+      PathParam.ofId("waiting-list");
 
   public static final @NotNull PathParam<BookingId> BOOKINGS = PathParam.ofId("bookings");
 

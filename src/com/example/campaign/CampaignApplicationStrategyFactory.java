@@ -22,6 +22,19 @@ public record CampaignApplicationStrategyFactory(
     @NotNull URIBuilder uriBuilder)
     implements com.example.CampaignApplicationStrategyFactory {
 
+  public static class FactoryImpl
+      implements com.example.CampaignApplicationStrategyFactory.Factory {
+    @Override
+    public com.example.CampaignApplicationStrategyFactory createInstance(
+        @NotNull CampaignEvents campaignEvents,
+        @NotNull IdGenerator idGenerator,
+        @NotNull SalesStore salesStore,
+        @NotNull URIBuilder uriBuilder) {
+      return new CampaignApplicationStrategyFactory(
+          campaignEvents, idGenerator, salesStore, uriBuilder);
+    }
+  }
+
   @Override
   @NotNull
   public CampaignApplicationStrategy getStrategy(
