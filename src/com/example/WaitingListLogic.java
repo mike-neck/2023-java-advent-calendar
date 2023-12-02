@@ -17,6 +17,7 @@ public class WaitingListLogic {
   final @NotNull ProductTable productTable;
   final @NotNull CampaignEvents campaignEvents;
   final @NotNull SalesStore salesStore;
+  final @NotNull CampaignApplicationStrategyFactory campaignApplicationStrategyFactory;
 
   WaitingListLogic(
       @NotNull Clock clock,
@@ -33,6 +34,8 @@ public class WaitingListLogic {
     this.productTable = productTable;
     this.campaignEvents = campaignEvents;
     this.salesStore = salesStore;
+    this.campaignApplicationStrategyFactory =
+        new CampaignApplicationStrategyFactory(campaignEvents, idGenerator, salesStore, uriBuilder);
   }
 
   static final @NotNull PathParam<ProductId> PRODUCTS = PathParam.ofId("products");
@@ -63,8 +66,6 @@ public class WaitingListLogic {
         campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
     Collection<WaitingList> waitingList =
         campaignEvents.findWaitingList(product.getId(), area, now);
-    CampaignApplicationStrategyFactory campaignApplicationStrategyFactory =
-        new CampaignApplicationStrategyFactory();
     CampaignApplicationStrategy strategy =
         getStrategy(
             campaignApplicationStrategyFactory,
@@ -81,7 +82,11 @@ public class WaitingListLogic {
     return strategy.register(customerId, productId, area, campaignCode);
   }
 
-  record CampaignApplicationStrategyFactory() {}
+  record CampaignApplicationStrategyFactory(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull IdGenerator idGenerator,
+      @NotNull SalesStore salesStore,
+      @NotNull URIBuilder uriBuilder) {}
 
   @NotNull
   private static CampaignApplicationStrategy getStrategy(
