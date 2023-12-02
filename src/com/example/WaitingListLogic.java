@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("unused")
 public class WaitingListLogic {
   final @NotNull Clock clock;
   final @NotNull URIBuilder uriBuilder;
