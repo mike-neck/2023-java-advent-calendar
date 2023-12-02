@@ -66,7 +66,7 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         SaveNewWaitingList saveNewWaitingList =
             new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
-        return saveNewWaitingList(saveNewWaitingList, customerId, productId, area, campaignCode);
+        return saveNewWaitingList.saveNewWaitingList(customerId, productId, area, campaignCode);
       } else {
         SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
             new SaveAsNewBookingWithCampaignReward(
@@ -94,55 +94,44 @@ public class WaitingListLogic {
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
       @NotNull CampaignPriority priority,
-      @NotNull Instant now) {}
-
-  @NotNull
-  static URI saveNewWaitingList(
-      @NotNull SaveNewWaitingList saveNewWaitingList,
-      @NotNull CustomerId customerId,
-      @NotNull ProductId productId,
-      @NotNull Area area,
-      @Nullable CampaignCode campaignCode) {
-    // ウェイティングリストに初めて人が並ぶ場合
-    CampaignRule rule = saveNewWaitingList.campaignEvents().findRule(productId, area);
-    if (rule == null) {
-      CampaignRuleId campaignRuleId =
-          saveNewWaitingList.idGenerator().generateNew(CampaignRuleId.class);
-      rule =
-          saveNewWaitingList
-              .campaignEvents()
-              .createNewRule(productId, area, campaignRuleId, CampaignRule.getDefault());
+      @NotNull Instant now) {
+    @NotNull
+    URI saveNewWaitingList(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      // ウェイティングリストに初めて人が並ぶ場合
+      CampaignRule rule = campaignEvents().findRule(productId, area);
+      if (rule == null) {
+        CampaignRuleId campaignRuleId = idGenerator().generateNew(CampaignRuleId.class);
+        rule =
+            campaignEvents()
+                .createNewRule(productId, area, campaignRuleId, CampaignRule.getDefault());
+      }
+      WaitingListId waitingListId = idGenerator().generateNew(WaitingListId.class);
+      WaitingRequest waitingRequest =
+          rule.createRequest(waitingListId, customerId, productId, priority(), area, now());
+      WaitingList waiting = campaignEvents().createNewWaitingCustomer(waitingRequest);
+      if (campaignCode != null) {
+        CampaignRewardRequest request =
+            new CampaignRewardRequest(
+                productId,
+                Reference.of(WaitingList.class, waiting.getId()),
+                priority(),
+                campaignCode,
+                now());
+        campaignEvents().createCampaignReward(request);
+      }
+      return uriBuilder()
+          .name(PRODUCTS)
+          .value(productId)
+          .name(Area.PATH_PARAM)
+          .value(area)
+          .name(WAITING_LIST)
+          .value(waiting.getId())
+          .build();
     }
-    WaitingListId waitingListId = saveNewWaitingList.idGenerator().generateNew(WaitingListId.class);
-    WaitingRequest waitingRequest =
-        rule.createRequest(
-            waitingListId,
-            customerId,
-            productId,
-            saveNewWaitingList.priority(),
-            area,
-            saveNewWaitingList.now());
-    WaitingList waiting =
-        saveNewWaitingList.campaignEvents().createNewWaitingCustomer(waitingRequest);
-    if (campaignCode != null) {
-      CampaignRewardRequest request =
-          new CampaignRewardRequest(
-              productId,
-              Reference.of(WaitingList.class, waiting.getId()),
-              saveNewWaitingList.priority(),
-              campaignCode,
-              saveNewWaitingList.now());
-      saveNewWaitingList.campaignEvents().createCampaignReward(request);
-    }
-    return saveNewWaitingList
-        .uriBuilder()
-        .name(PRODUCTS)
-        .value(productId)
-        .name(Area.PATH_PARAM)
-        .value(area)
-        .name(WAITING_LIST)
-        .value(waiting.getId())
-        .build();
   }
 
   record SaveAsNewBookingWithCampaignReward(
