@@ -89,9 +89,19 @@ public class WaitingListLogic {
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
         return addNewWaitingList(
-            customerId, productId, area, campaignCode, waitingList, priority, now);
+            campaignEvents,
+            idGenerator,
+            uriBuilder,
+            customerId,
+            productId,
+            area,
+            campaignCode,
+            waitingList,
+            priority,
+            now);
       } else {
-        return saveAsBookingIfAvailable(customerId, productId, area, campaignCode, now);
+        return saveAsBookingIfAvailable(
+            campaignEvents, salesStore, uriBuilder, customerId, productId, area, campaignCode, now);
       }
     }
   }
@@ -167,7 +177,10 @@ public class WaitingListLogic {
   }
 
   @NotNull
-  private URI addNewWaitingList(
+  private static URI addNewWaitingList(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull IdGenerator idGenerator,
+      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
@@ -204,7 +217,10 @@ public class WaitingListLogic {
   }
 
   @NotNull
-  private URI saveAsBookingIfAvailable(
+  private static URI saveAsBookingIfAvailable(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull SalesStore salesStore,
+      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
