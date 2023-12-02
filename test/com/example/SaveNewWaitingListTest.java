@@ -54,15 +54,11 @@ class SaveNewWaitingListTest {
         WaitingListLogic.saveNewWaitingList(
             new WaitingListLogic.SaveNewWaitingList(
                 campaignEvents, idGenerator, uriBuilder, priority, OPERATION_DATE_TIME),
-            campaignEvents,
-            idGenerator,
-            uriBuilder,
-            customerId,
+                customerId,
             productId,
             area,
-            null,
-            priority,
-            OPERATION_DATE_TIME);
+            null
+        );
     assertTrue(uri.toASCIIString().contains("product/10/"));
     assertTrue(uri.toASCIIString().contains("waiting-list/0000-1111"));
   }

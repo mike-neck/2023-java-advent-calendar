@@ -66,17 +66,7 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         SaveNewWaitingList saveNewWaitingList =
             new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
-        return saveNewWaitingList(
-            saveNewWaitingList,
-            campaignEvents,
-            idGenerator,
-            uriBuilder,
-            customerId,
-            productId,
-            area,
-            campaignCode,
-            priority,
-            now);
+        return saveNewWaitingList(saveNewWaitingList, customerId, productId, area, campaignCode);
       } else {
         SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
             new SaveAsNewBookingWithCampaignReward(
@@ -137,37 +127,43 @@ public class WaitingListLogic {
   @NotNull
   static URI saveNewWaitingList(
       @NotNull SaveNewWaitingList saveNewWaitingList,
-      @NotNull CampaignEvents campaignEvents,
-      @NotNull IdGenerator idGenerator,
-      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
-      @Nullable CampaignCode campaignCode,
-      @NotNull CampaignPriority priority,
-      @NotNull Instant now) {
+      @Nullable CampaignCode campaignCode) {
     // ウェイティングリストに初めて人が並ぶ場合
-    CampaignRule rule = campaignEvents.findRule(productId, area);
+    CampaignRule rule = saveNewWaitingList.campaignEvents().findRule(productId, area);
     if (rule == null) {
-      CampaignRuleId campaignRuleId = idGenerator.generateNew(CampaignRuleId.class);
+      CampaignRuleId campaignRuleId =
+          saveNewWaitingList.idGenerator().generateNew(CampaignRuleId.class);
       rule =
-          campaignEvents.createNewRule(productId, area, campaignRuleId, CampaignRule.getDefault());
+          saveNewWaitingList
+              .campaignEvents()
+              .createNewRule(productId, area, campaignRuleId, CampaignRule.getDefault());
     }
-    WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
+    WaitingListId waitingListId = saveNewWaitingList.idGenerator().generateNew(WaitingListId.class);
     WaitingRequest waitingRequest =
-        rule.createRequest(waitingListId, customerId, productId, priority, area, now);
-    WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
+        rule.createRequest(
+            waitingListId,
+            customerId,
+            productId,
+            saveNewWaitingList.priority(),
+            area,
+            saveNewWaitingList.now());
+    WaitingList waiting =
+        saveNewWaitingList.campaignEvents().createNewWaitingCustomer(waitingRequest);
     if (campaignCode != null) {
       CampaignRewardRequest request =
           new CampaignRewardRequest(
               productId,
               Reference.of(WaitingList.class, waiting.getId()),
-              priority,
+              saveNewWaitingList.priority(),
               campaignCode,
-              now);
-      campaignEvents.createCampaignReward(request);
+              saveNewWaitingList.now());
+      saveNewWaitingList.campaignEvents().createCampaignReward(request);
     }
-    return uriBuilder
+    return saveNewWaitingList
+        .uriBuilder()
         .name(PRODUCTS)
         .value(productId)
         .name(Area.PATH_PARAM)
