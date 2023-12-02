@@ -85,8 +85,8 @@ public class WaitingListLogic {
       @NotNull ProductId productId,
       @NotNull Area area,
       @Nullable CampaignCode campaignCode,
-      CampaignPriority priority,
-      Instant now) {
+      @NotNull CampaignPriority priority,
+      @NotNull Instant now) {
     // ウェイティングリストに初めて人が並ぶ場合
     CampaignRule rule = campaignEvents.findRule(productId, area);
     if (rule == null) {
