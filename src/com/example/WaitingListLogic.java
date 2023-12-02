@@ -103,7 +103,8 @@ public class WaitingListLogic {
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
       @NotNull CampaignPriority priority,
-      @NotNull Instant now) {
+      @NotNull Instant now)
+      implements CampaignApplicationStrategy {
     @NotNull
     URI saveNewWaitingList(
         @NotNull CustomerId customerId,
@@ -141,6 +142,15 @@ public class WaitingListLogic {
           .value(waiting.getId())
           .build();
     }
+
+    @Override
+    public @NotNull URI register(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      return saveNewWaitingList(customerId, productId, area, campaignCode);
+    }
   }
 
   record SaveAsNewBookingWithCampaignReward(
@@ -148,7 +158,8 @@ public class WaitingListLogic {
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
       @NotNull CampaignPriority priority,
-      @NotNull Instant now) {
+      @NotNull Instant now)
+      implements CampaignApplicationStrategy {
     @NotNull
     private URI saveAsNewBookingWithCampaignReward(
         @NotNull CustomerId customerId,
@@ -175,6 +186,15 @@ public class WaitingListLogic {
           .value(booking.getId())
           .build();
     }
+
+    @Override
+    public @NotNull URI register(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      return saveAsNewBookingWithCampaignReward(customerId, productId, area, campaignCode);
+    }
   }
 
   record AddNewWaitingList(
@@ -183,7 +203,8 @@ public class WaitingListLogic {
       @NotNull URIBuilder uriBuilder,
       @NotNull Collection<WaitingList> waitingList,
       @NotNull CampaignPriority priority,
-      @NotNull Instant now) {
+      @NotNull Instant now)
+      implements CampaignApplicationStrategy {
     @NotNull
     private URI addNewWaitingList(
         @NotNull CustomerId customerId,
@@ -218,13 +239,23 @@ public class WaitingListLogic {
           .value(waiting.getId())
           .build();
     }
+
+    @Override
+    public @NotNull URI register(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      return addNewWaitingList(customerId, productId, area, campaignCode);
+    }
   }
 
   record SaveAsBookingIfAvailable(
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
-      @NotNull Instant now) {
+      @NotNull Instant now)
+      implements CampaignApplicationStrategy {
     @NotNull
     private URI saveAsBookingIfAvailable(
         @NotNull CustomerId customerId,
@@ -247,6 +278,15 @@ public class WaitingListLogic {
             .saveExpiredCampaignApplication(customerId, productId, area, now(), campaignCode);
         return uriBuilder().name(PRODUCTS).value(productId).name("expired").build();
       }
+    }
+
+    @Override
+    public @NotNull URI register(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      return saveAsBookingIfAvailable(customerId, productId, area, campaignCode);
     }
   }
 }
