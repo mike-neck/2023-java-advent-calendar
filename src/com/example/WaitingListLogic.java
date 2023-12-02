@@ -63,6 +63,7 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
+        // ウェイティングリストに初めて人が並ぶ場合
         CampaignRule rule = campaignEvents.findRule(productId, area);
         if (rule == null) {
           CampaignRuleId campaignRuleId = idGenerator.generateNew(CampaignRuleId.class);
@@ -93,6 +94,7 @@ public class WaitingListLogic {
             .value(waiting.getId())
             .build();
       } else {
+        // ウェイティングリストが終了している場合は予約として扱う
         Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
         if (campaignCode != null) {
           CampaignRewardRequest request =
@@ -114,6 +116,7 @@ public class WaitingListLogic {
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
+        // ウェイティングリストに並ぶ場合、現在の待ち順位を算出して登録
         WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
         CampaignRule rule = campaignEvents.findRule(productId, area);
         if (rule == null) {
