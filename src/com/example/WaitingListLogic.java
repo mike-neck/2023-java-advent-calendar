@@ -66,12 +66,12 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         SaveNewWaitingList saveNewWaitingList =
             new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
-        return saveNewWaitingList.saveNewWaitingList(customerId, productId, area, campaignCode);
+        return saveNewWaitingList.register(customerId, productId, area, campaignCode);
       } else {
         SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
             new SaveAsNewBookingWithCampaignReward(
                 campaignEvents, salesStore, uriBuilder, priority, now);
-        return saveAsNewBookingWithCampaignReward.saveAsNewBookingWithCampaignReward(
+        return saveAsNewBookingWithCampaignReward.register(
             customerId, productId, area, campaignCode);
       }
     } else {
@@ -79,12 +79,11 @@ public class WaitingListLogic {
         AddNewWaitingList addNewWaitingList =
             new AddNewWaitingList(
                 campaignEvents, idGenerator, uriBuilder, waitingList, priority, now);
-        return addNewWaitingList.addNewWaitingList(customerId, productId, area, campaignCode);
+        return addNewWaitingList.register(customerId, productId, area, campaignCode);
       } else {
         SaveAsBookingIfAvailable saveAsBookingIfAvailable =
             new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
-        return saveAsBookingIfAvailable.saveAsBookingIfAvailable(
-            customerId, productId, area, campaignCode);
+        return saveAsBookingIfAvailable.register(customerId, productId, area, campaignCode);
       }
     }
   }
