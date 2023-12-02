@@ -67,14 +67,8 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList =
         campaignEvents.findWaitingList(product.getId(), area, now);
     CampaignApplicationStrategy strategy =
-        getStrategy(
-            campaignApplicationStrategyFactory,
-            waitingList,
-            product,
-            priority,
-            area,
-            now,
-            campaignCode);
+        campaignApplicationStrategyFactory.getStrategy(
+            waitingList, product, priority, area, now, campaignCode);
     return strategy.register(customerId, productId, area, campaignCode);
   }
 
@@ -82,48 +76,30 @@ public class WaitingListLogic {
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull SalesStore salesStore,
-      @NotNull URIBuilder uriBuilder) {}
-
-  @NotNull
-  private static CampaignApplicationStrategy getStrategy(
-      @NotNull CampaignApplicationStrategyFactory campaignApplicationStrategyFactory,
-      @NotNull Collection<WaitingList> waitingList,
-      @NotNull Product product,
-      @NotNull CampaignPriority priority,
-      @NotNull Area area,
-      @NotNull Instant now,
-      @Nullable CampaignCode campaignCode) {
-    if (waitingList.isEmpty()) {
-      if (product.isWaitingListAvailableForArea(area)) {
-        return new SaveNewWaitingList(
-            campaignApplicationStrategyFactory.campaignEvents(),
-            campaignApplicationStrategyFactory.idGenerator(),
-            campaignApplicationStrategyFactory.uriBuilder(),
-            priority,
-            now);
+      @NotNull URIBuilder uriBuilder) {
+    @NotNull
+    private CampaignApplicationStrategy getStrategy(
+        @NotNull Collection<WaitingList> waitingList,
+        @NotNull Product product,
+        @NotNull CampaignPriority priority,
+        @NotNull Area area,
+        @NotNull Instant now,
+        @Nullable CampaignCode campaignCode) {
+      if (waitingList.isEmpty()) {
+        if (product.isWaitingListAvailableForArea(area)) {
+          return new SaveNewWaitingList(
+              campaignEvents(), idGenerator(), uriBuilder(), priority, now);
+        } else {
+          return new SaveAsNewBookingWithCampaignReward(
+              campaignEvents(), salesStore(), uriBuilder(), priority, now);
+        }
       } else {
-        return new SaveAsNewBookingWithCampaignReward(
-            campaignApplicationStrategyFactory.campaignEvents(),
-            campaignApplicationStrategyFactory.salesStore(),
-            campaignApplicationStrategyFactory.uriBuilder(),
-            priority,
-            now);
-      }
-    } else {
-      if (product.isWaitingListAvailableForArea(area)) {
-        return new AddNewWaitingList(
-            campaignApplicationStrategyFactory.campaignEvents(),
-            campaignApplicationStrategyFactory.idGenerator(),
-            campaignApplicationStrategyFactory.uriBuilder(),
-            waitingList,
-            priority,
-            now);
-      } else {
-        return new SaveAsBookingIfAvailable(
-            campaignApplicationStrategyFactory.campaignEvents(),
-            campaignApplicationStrategyFactory.salesStore(),
-            campaignApplicationStrategyFactory.uriBuilder(),
-            now);
+        if (product.isWaitingListAvailableForArea(area)) {
+          return new AddNewWaitingList(
+              campaignEvents(), idGenerator(), uriBuilder(), waitingList, priority, now);
+        } else {
+          return new SaveAsBookingIfAvailable(campaignEvents(), salesStore(), uriBuilder(), now);
+        }
       }
     }
   }
