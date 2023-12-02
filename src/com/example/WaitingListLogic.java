@@ -76,7 +76,15 @@ public class WaitingListLogic {
             now);
       } else {
         return saveAsNewBookingWithCampaignReward(
-            customerId, productId, area, campaignCode, now, priority);
+            campaignEvents,
+            salesStore,
+            uriBuilder,
+            customerId,
+            productId,
+            area,
+            campaignCode,
+            now,
+            priority);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
@@ -131,7 +139,10 @@ public class WaitingListLogic {
   }
 
   @NotNull
-  private URI saveAsNewBookingWithCampaignReward(
+  private static URI saveAsNewBookingWithCampaignReward(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull SalesStore salesStore,
+      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
