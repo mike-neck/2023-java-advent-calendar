@@ -1,3 +1,3 @@
 package com.example;
 
-interface WaitingListId extends Id<WaitingList> {}
+public interface WaitingListId extends Id<WaitingList> {}

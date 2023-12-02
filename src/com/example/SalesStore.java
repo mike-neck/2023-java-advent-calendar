@@ -3,7 +3,7 @@ package com.example;
 import java.time.Instant;
 import org.jetbrains.annotations.NotNull;
 
-interface SalesStore {
+public interface SalesStore {
   @NotNull
   Booking bookPurchaseContract(
       @NotNull CustomerId customerId,

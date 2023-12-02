@@ -1,3 +1,3 @@
 package com.example;
 
-interface ProductId extends Id<Product> {}
+public interface ProductId extends Id<Product> {}

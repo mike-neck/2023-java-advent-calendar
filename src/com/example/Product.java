@@ -2,7 +2,7 @@ package com.example;
 
 import org.jetbrains.annotations.NotNull;
 
-interface Product {
+public interface Product {
   boolean isOnSale();
 
   boolean isEndOfSale();

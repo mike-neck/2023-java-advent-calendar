@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-interface CampaignEvents {
+public interface CampaignEvents {
 
   @NotNull
   Collection<WaitingList> findWaitingList(

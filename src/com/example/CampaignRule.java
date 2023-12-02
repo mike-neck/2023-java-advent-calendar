@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
 
-interface CampaignRule {
+public interface CampaignRule {
   static @NotNull CampaignRule getDefault() {
     throw new UnsupportedOperationException();
   }

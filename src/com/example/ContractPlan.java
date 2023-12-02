@@ -2,7 +2,7 @@ package com.example;
 
 import org.jetbrains.annotations.NotNull;
 
-interface ContractPlan {
+public interface ContractPlan {
   @NotNull CampaignPriority campaignPriority();
   @NotNull
   ContractPlan rankUp();

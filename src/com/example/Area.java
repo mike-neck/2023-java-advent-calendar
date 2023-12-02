@@ -2,7 +2,7 @@ package com.example;
 
 import org.jetbrains.annotations.NotNull;
 
-sealed interface Area {
+public sealed interface Area {
   enum Fixed implements Area {
     TOKYO,
     SOUTH_KANTO,

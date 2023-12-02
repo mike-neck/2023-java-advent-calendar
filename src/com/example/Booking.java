@@ -2,7 +2,7 @@ package com.example;
 
 import org.jetbrains.annotations.NotNull;
 
-interface Booking {
+public interface Booking {
   @NotNull
   BookingId getId();
 }

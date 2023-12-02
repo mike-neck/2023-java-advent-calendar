@@ -1,3 +1,3 @@
 package com.example;
 
-interface CampaignRuleId extends Id<CampaignRule> {}
+public interface CampaignRuleId extends Id<CampaignRule> {}
