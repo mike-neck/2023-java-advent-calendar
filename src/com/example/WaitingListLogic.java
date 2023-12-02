@@ -58,22 +58,24 @@ public class WaitingListLogic {
       throw new IllegalArgumentException(
           "product has no waiting list, id = { productId }, name = { product.getName() }");
     }
+    Instant now = Instant.now(clock);
+    CampaignPriority priority =
+        campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
+    Collection<WaitingList> waitingList =
+        campaignEvents.findWaitingList(product.getId(), area, now);
     CampaignApplicationStrategy strategy =
-        getStrategy(productId, area, campaignCode, customer, product);
+        getStrategy(waitingList, product, priority, area, now, campaignCode);
     return strategy.register(customerId, productId, area, campaignCode);
   }
 
   @NotNull
   private CampaignApplicationStrategy getStrategy(
-      @NotNull ProductId productId,
+      @NotNull Collection<WaitingList> waitingList,
+      @NotNull Product product,
+      @NotNull CampaignPriority priority,
       @NotNull Area area,
-      @Nullable CampaignCode campaignCode,
-      Customer customer,
-      Product product) {
-    Instant now = Instant.now(clock);
-    CampaignPriority priority =
-        campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
-    Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
+      @NotNull Instant now,
+      @Nullable CampaignCode campaignCode) {
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
         return new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);

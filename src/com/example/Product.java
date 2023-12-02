@@ -8,4 +8,7 @@ interface Product {
   boolean isEndOfSale();
 
   boolean isWaitingListAvailableForArea(@NotNull Area area);
+
+  @NotNull
+  ProductId getId();
 }
