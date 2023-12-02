@@ -72,16 +72,7 @@ public class WaitingListLogic {
             new SaveAsNewBookingWithCampaignReward(
                 campaignEvents, salesStore, uriBuilder, priority, now);
         return saveAsNewBookingWithCampaignReward(
-            saveAsNewBookingWithCampaignReward,
-            campaignEvents,
-            salesStore,
-            uriBuilder,
-            customerId,
-            productId,
-            area,
-            campaignCode,
-            now,
-            priority);
+            saveAsNewBookingWithCampaignReward, customerId, productId, area, campaignCode);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
@@ -183,24 +174,28 @@ public class WaitingListLogic {
   @NotNull
   private static URI saveAsNewBookingWithCampaignReward(
       @NotNull SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward,
-      @NotNull CampaignEvents campaignEvents,
-      @NotNull SalesStore salesStore,
-      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
-      @Nullable CampaignCode campaignCode,
-      @NotNull Instant now,
-      @NotNull CampaignPriority priority) {
+      @Nullable CampaignCode campaignCode) {
     // ウェイティングリストが終了している場合は予約として扱う
-    Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
+    Booking booking =
+        saveAsNewBookingWithCampaignReward
+            .salesStore()
+            .bookPurchaseContract(
+                customerId, productId, area, saveAsNewBookingWithCampaignReward.now());
     if (campaignCode != null) {
       CampaignRewardRequest request =
           new CampaignRewardRequest(
-              productId, Reference.of(Booking.class, booking.getId()), priority, campaignCode, now);
-      campaignEvents.createCampaignReward(request);
+              productId,
+              Reference.of(Booking.class, booking.getId()),
+              saveAsNewBookingWithCampaignReward.priority(),
+              campaignCode,
+              saveAsNewBookingWithCampaignReward.now());
+      saveAsNewBookingWithCampaignReward.campaignEvents().createCampaignReward(request);
     }
-    return uriBuilder
+    return saveAsNewBookingWithCampaignReward
+        .uriBuilder()
         .name(PRODUCTS)
         .value(productId)
         .name("contracts")
