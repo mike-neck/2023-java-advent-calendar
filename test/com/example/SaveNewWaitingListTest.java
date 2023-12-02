@@ -4,6 +4,7 @@ import static com.example.Mock.mock;
 import static com.example.Mock.with;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.example.campaign.SaveNewWaitingList;
 import java.net.URI;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -50,8 +51,8 @@ class SaveNewWaitingListTest {
         .returns(waitingList);
     with(waitingList).call(WaitingList::getId).returns(waitingListId);
 
-    WaitingListLogic.SaveNewWaitingList saveNewWaitingList =
-        new WaitingListLogic.SaveNewWaitingList(
+    SaveNewWaitingList saveNewWaitingList =
+        new SaveNewWaitingList(
             campaignEvents, idGenerator, uriBuilder, priority, OPERATION_DATE_TIME);
     URI uri = saveNewWaitingList.register(customerId, productId, area, null);
     assertTrue(uri.toASCIIString().contains("product/10/"));
