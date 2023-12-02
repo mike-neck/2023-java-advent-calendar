@@ -10,7 +10,7 @@ interface CampaignRule {
   }
 
   @NotNull
-  WaitingListRuleId getId();
+  CampaignRuleId getId();
 
   @NotNull
   WaitingRequest createRequest(

@@ -23,7 +23,7 @@ interface CampaignEvents {
   CampaignRule createNewRule(
       @NotNull ProductId productId,
       @NotNull Area area,
-      @NotNull WaitingListRuleId waitingListRuleId,
+      @NotNull CampaignRuleId campaignRuleId,
       @NotNull CampaignRule rule);
 
   void saveExpiredCampaignApplication(

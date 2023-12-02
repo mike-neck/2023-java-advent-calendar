@@ -65,10 +65,10 @@ public class WaitingListLogic {
       if (product.isWaitingListAvailableForArea(area)) {
         CampaignRule rule = campaignEvents.findRule(productId, area);
         if (rule == null) {
-          WaitingListRuleId waitingListRuleId = idGenerator.generateNew(WaitingListRuleId.class);
+          CampaignRuleId campaignRuleId = idGenerator.generateNew(CampaignRuleId.class);
           rule =
               campaignEvents.createNewRule(
-                  productId, area, waitingListRuleId, CampaignRule.getDefault());
+                  productId, area, campaignRuleId, CampaignRule.getDefault());
         }
         WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
         WaitingRequest waitingRequest =
