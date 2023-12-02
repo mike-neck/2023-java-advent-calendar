@@ -64,12 +64,26 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList =
         campaignEvents.findWaitingList(product.getId(), area, now);
     CampaignApplicationStrategy strategy =
-        getStrategy(waitingList, product, priority, area, now, campaignCode);
+        getStrategy(
+            campaignEvents,
+            idGenerator,
+            salesStore,
+            uriBuilder,
+            waitingList,
+            product,
+            priority,
+            area,
+            now,
+            campaignCode);
     return strategy.register(customerId, productId, area, campaignCode);
   }
 
   @NotNull
-  private CampaignApplicationStrategy getStrategy(
+  private static CampaignApplicationStrategy getStrategy(
+      @NotNull CampaignEvents campaignEvents,
+      @NotNull IdGenerator idGenerator,
+      @NotNull SalesStore salesStore,
+      @NotNull URIBuilder uriBuilder,
       @NotNull Collection<WaitingList> waitingList,
       @NotNull Product product,
       @NotNull CampaignPriority priority,
