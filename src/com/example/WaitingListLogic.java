@@ -104,7 +104,7 @@ public class WaitingListLogic {
     }
   }
 
-  interface CampaignApplicationStrategy {
+  public interface CampaignApplicationStrategy {
     @NotNull
     URI register(
         @NotNull CustomerId customerId,
@@ -113,7 +113,7 @@ public class WaitingListLogic {
         @Nullable CampaignCode campaignCode);
   }
 
-  record SaveNewWaitingList(
+  public record SaveNewWaitingList(
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
@@ -168,7 +168,7 @@ public class WaitingListLogic {
     }
   }
 
-  record SaveAsNewBookingWithCampaignReward(
+  public record SaveAsNewBookingWithCampaignReward(
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
@@ -212,7 +212,7 @@ public class WaitingListLogic {
     }
   }
 
-  record AddNewWaitingList(
+  public record AddNewWaitingList(
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
@@ -265,7 +265,7 @@ public class WaitingListLogic {
     }
   }
 
-  record SaveAsBookingIfAvailable(
+  public record SaveAsBookingIfAvailable(
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
