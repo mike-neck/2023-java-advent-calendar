@@ -64,7 +64,9 @@ public class WaitingListLogic {
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
+        SaveNewWaitingList saveNewWaitingList = new SaveNewWaitingList();
         return saveNewWaitingList(
+            saveNewWaitingList,
             campaignEvents,
             idGenerator,
             uriBuilder,
@@ -75,7 +77,10 @@ public class WaitingListLogic {
             priority,
             now);
       } else {
+        SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
+            new SaveAsNewBookingWithCampaignReward();
         return saveAsNewBookingWithCampaignReward(
+            saveAsNewBookingWithCampaignReward,
             campaignEvents,
             salesStore,
             uriBuilder,
@@ -88,7 +93,9 @@ public class WaitingListLogic {
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
+        AddNewWaitingList addNewWaitingList = new AddNewWaitingList();
         return addNewWaitingList(
+            addNewWaitingList,
             campaignEvents,
             idGenerator,
             uriBuilder,
@@ -100,14 +107,26 @@ public class WaitingListLogic {
             priority,
             now);
       } else {
+        SaveAsBookingIfAvailable saveAsBookingIfAvailable = new SaveAsBookingIfAvailable();
         return saveAsBookingIfAvailable(
-            campaignEvents, salesStore, uriBuilder, customerId, productId, area, campaignCode, now);
+            saveAsBookingIfAvailable,
+            campaignEvents,
+            salesStore,
+            uriBuilder,
+            customerId,
+            productId,
+            area,
+            campaignCode,
+            now);
       }
     }
   }
 
+  static class SaveNewWaitingList {}
+
   @NotNull
   static URI saveNewWaitingList(
+      @NotNull SaveNewWaitingList saveNewWaitingList,
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
@@ -148,8 +167,11 @@ public class WaitingListLogic {
         .build();
   }
 
+  static class SaveAsNewBookingWithCampaignReward {}
+
   @NotNull
   private static URI saveAsNewBookingWithCampaignReward(
+      @NotNull SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward,
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
@@ -176,8 +198,11 @@ public class WaitingListLogic {
         .build();
   }
 
+  static class AddNewWaitingList {}
+
   @NotNull
   private static URI addNewWaitingList(
+      @NotNull AddNewWaitingList addNewWaitingList,
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull URIBuilder uriBuilder,
@@ -216,8 +241,11 @@ public class WaitingListLogic {
         .build();
   }
 
+  static class SaveAsBookingIfAvailable {}
+
   @NotNull
   private static URI saveAsBookingIfAvailable(
+      @NotNull SaveAsBookingIfAvailable saveAsBookingIfAvailable,
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,

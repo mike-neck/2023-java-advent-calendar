@@ -52,6 +52,7 @@ class SaveNewWaitingListTest {
 
     URI uri =
         WaitingListLogic.saveNewWaitingList(
+            new WaitingListLogic.SaveNewWaitingList(),
             campaignEvents,
             idGenerator,
             uriBuilder,
