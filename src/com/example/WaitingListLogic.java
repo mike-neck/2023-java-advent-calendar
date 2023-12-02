@@ -58,9 +58,9 @@ public class WaitingListLogic {
           "product has no waiting list, id = { productId }, name = { product.getName() }");
     }
     Instant now = Instant.now(clock);
-    ContractPlan plan = campaignCode == null ? customer.getPlan() : customer.getPlan().rankUp();
-    Collection<WaitingList> waitingList =
-        campaignEvents.findWaitingList(productId, plan, area, now);
+    CampaignPriority priority =
+        campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
+    Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
         CampaignRule rule = campaignEvents.findRule(productId, area);
@@ -72,14 +72,14 @@ public class WaitingListLogic {
         }
         WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
         WaitingRequest waitingRequest =
-            rule.createRequest(waitingListId, customerId, productId, plan, area, now);
+            rule.createRequest(waitingListId, customerId, productId, priority, area, now);
         WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
         if (campaignCode != null) {
           CampaignRewardRequest request =
               new CampaignRewardRequest(
                   productId,
                   Reference.of(WaitingList.class, waiting.getId()),
-                  plan,
+                  priority,
                   campaignCode,
                   now);
           campaignEvents.createCampaignReward(request);
@@ -97,7 +97,11 @@ public class WaitingListLogic {
         if (campaignCode != null) {
           CampaignRewardRequest request =
               new CampaignRewardRequest(
-                  productId, Reference.of(Booking.class, booking.getId()), plan, campaignCode, now);
+                  productId,
+                  Reference.of(Booking.class, booking.getId()),
+                  priority,
+                  campaignCode,
+                  now);
           campaignEvents.createCampaignReward(request);
         }
         return uriBuilder
@@ -117,14 +121,15 @@ public class WaitingListLogic {
               "no rules found for the waiting list of the product, id = { productId } area = { area }");
         }
         WaitingRequest waitingRequest =
-            rule.createRequest(waitingList, waitingListId, customerId, productId, plan, area, now);
+            rule.createRequest(
+                waitingList, waitingListId, customerId, productId, priority, area, now);
         WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
         if (campaignCode != null) {
           CampaignRewardRequest request =
               new CampaignRewardRequest(
                   productId,
                   Reference.of(WaitingList.class, waiting.getId()),
-                  plan,
+                  priority,
                   campaignCode,
                   now);
           campaignEvents.createCampaignReward(request);

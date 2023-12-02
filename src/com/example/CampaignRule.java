@@ -17,7 +17,7 @@ interface CampaignRule {
       @NotNull WaitingListId waitingListId,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
-      @NotNull ContractPlan plan,
+      @NotNull CampaignPriority plan,
       @NotNull Area area,
       @NotNull Instant startWaitingDateTime);
 
@@ -27,7 +27,7 @@ interface CampaignRule {
       @NotNull WaitingListId waitingListId,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
-      @NotNull ContractPlan plan,
+      @NotNull CampaignPriority plan,
       @NotNull Area area,
       @NotNull Instant startWaitingDateTime);
 

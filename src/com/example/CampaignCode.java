@@ -1,3 +1,7 @@
 package com.example;
 
-interface CampaignCode {}
+import org.jetbrains.annotations.NotNull;
+
+interface CampaignCode {
+    @NotNull CampaignPriority getPriority();
+}

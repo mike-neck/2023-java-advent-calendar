@@ -9,10 +9,7 @@ interface CampaignEvents {
 
   @NotNull
   Collection<WaitingList> findWaitingList(
-      @NotNull ProductId productId,
-      @NotNull ContractPlan contractPlan,
-      @NotNull Area area,
-      @NotNull Instant startWaitingDateTime);
+      @NotNull ProductId productId, @NotNull Area area, @NotNull Instant startWaitingDateTime);
 
   @NotNull
   WaitingList createNewWaitingCustomer(@NotNull WaitingRequest waitingRequest);
