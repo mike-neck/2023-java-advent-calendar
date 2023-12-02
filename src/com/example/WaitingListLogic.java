@@ -84,15 +84,7 @@ public class WaitingListLogic {
         SaveAsBookingIfAvailable saveAsBookingIfAvailable =
             new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
         return saveAsBookingIfAvailable(
-            saveAsBookingIfAvailable,
-            campaignEvents,
-            salesStore,
-            uriBuilder,
-            customerId,
-            productId,
-            area,
-            campaignCode,
-            now);
+            saveAsBookingIfAvailable, customerId, productId, area, campaignCode);
       }
     }
   }
@@ -254,19 +246,19 @@ public class WaitingListLogic {
   @NotNull
   private static URI saveAsBookingIfAvailable(
       @NotNull SaveAsBookingIfAvailable saveAsBookingIfAvailable,
-      @NotNull CampaignEvents campaignEvents,
-      @NotNull SalesStore salesStore,
-      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
-      @Nullable CampaignCode campaignCode,
-      @NotNull Instant now) {
+      @Nullable CampaignCode campaignCode) {
     // Waiting List を締め切った場合
-    CampaignRule rule = campaignEvents.findRule(productId, area);
+    CampaignRule rule = saveAsBookingIfAvailable.campaignEvents().findRule(productId, area);
     if (rule != null && rule.acceptsBookingAfterCampaignDeadline()) {
-      Booking booking = salesStore.bookPurchaseContract(customerId, productId, area, now);
-      return uriBuilder
+      Booking booking =
+          saveAsBookingIfAvailable
+              .salesStore()
+              .bookPurchaseContract(customerId, productId, area, saveAsBookingIfAvailable.now());
+      return saveAsBookingIfAvailable
+          .uriBuilder()
           .name(PRODUCTS)
           .value(productId)
           .name("contracts")
@@ -274,8 +266,16 @@ public class WaitingListLogic {
           .value(booking.getId())
           .build();
     } else {
-      campaignEvents.saveExpiredCampaignApplication(customerId, productId, area, now, campaignCode);
-      return uriBuilder.name(PRODUCTS).value(productId).name("expired").build();
+      saveAsBookingIfAvailable
+          .campaignEvents()
+          .saveExpiredCampaignApplication(
+              customerId, productId, area, saveAsBookingIfAvailable.now(), campaignCode);
+      return saveAsBookingIfAvailable
+          .uriBuilder()
+          .name(PRODUCTS)
+          .value(productId)
+          .name("expired")
+          .build();
     }
   }
 }
