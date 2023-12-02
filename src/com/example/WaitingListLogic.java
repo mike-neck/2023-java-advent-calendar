@@ -79,18 +79,7 @@ public class WaitingListLogic {
         AddNewWaitingList addNewWaitingList =
             new AddNewWaitingList(
                 campaignEvents, idGenerator, uriBuilder, waitingList, priority, now);
-        return addNewWaitingList(
-            addNewWaitingList,
-            campaignEvents,
-            idGenerator,
-            uriBuilder,
-            customerId,
-            productId,
-            area,
-            campaignCode,
-            waitingList,
-            priority,
-            now);
+        return addNewWaitingList(addNewWaitingList, customerId, productId, area, campaignCode);
       } else {
         SaveAsBookingIfAvailable saveAsBookingIfAvailable =
             new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
@@ -215,37 +204,40 @@ public class WaitingListLogic {
   @NotNull
   private static URI addNewWaitingList(
       @NotNull AddNewWaitingList addNewWaitingList,
-      @NotNull CampaignEvents campaignEvents,
-      @NotNull IdGenerator idGenerator,
-      @NotNull URIBuilder uriBuilder,
       @NotNull CustomerId customerId,
       @NotNull ProductId productId,
       @NotNull Area area,
-      @Nullable CampaignCode campaignCode,
-      @NotNull Collection<WaitingList> waitingList,
-      @NotNull CampaignPriority priority,
-      @NotNull Instant now) {
+      @Nullable CampaignCode campaignCode) {
     // ウェイティングリストに並ぶ場合、現在の待ち順位を算出して登録
-    WaitingListId waitingListId = idGenerator.generateNew(WaitingListId.class);
-    CampaignRule rule = campaignEvents.findRule(productId, area);
+    WaitingListId waitingListId = addNewWaitingList.idGenerator().generateNew(WaitingListId.class);
+    CampaignRule rule = addNewWaitingList.campaignEvents().findRule(productId, area);
     if (rule == null) {
       throw new IllegalStateException(
           "no rules found for the waiting list of the product, id = { productId } area = { area }");
     }
     WaitingRequest waitingRequest =
-        rule.createRequest(waitingList, waitingListId, customerId, productId, priority, area, now);
-    WaitingList waiting = campaignEvents.createNewWaitingCustomer(waitingRequest);
+        rule.createRequest(
+            addNewWaitingList.waitingList(),
+            waitingListId,
+            customerId,
+            productId,
+            addNewWaitingList.priority(),
+            area,
+            addNewWaitingList.now());
+    WaitingList waiting =
+        addNewWaitingList.campaignEvents().createNewWaitingCustomer(waitingRequest);
     if (campaignCode != null) {
       CampaignRewardRequest request =
           new CampaignRewardRequest(
               productId,
               Reference.of(WaitingList.class, waiting.getId()),
-              priority,
+              addNewWaitingList.priority(),
               campaignCode,
-              now);
-      campaignEvents.createCampaignReward(request);
+              addNewWaitingList.now());
+      addNewWaitingList.campaignEvents().createCampaignReward(request);
     }
-    return uriBuilder
+    return addNewWaitingList
+        .uriBuilder()
         .name(PRODUCTS)
         .value(productId)
         .name(WAITING_LIST)
