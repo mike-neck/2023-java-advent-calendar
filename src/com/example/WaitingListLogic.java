@@ -62,30 +62,25 @@ public class WaitingListLogic {
     CampaignPriority priority =
         campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
+    CampaignApplicationStrategy strategy;
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
-        SaveNewWaitingList saveNewWaitingList =
-            new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
-        return saveNewWaitingList.register(customerId, productId, area, campaignCode);
+        strategy = new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
       } else {
-        SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
+        strategy =
             new SaveAsNewBookingWithCampaignReward(
                 campaignEvents, salesStore, uriBuilder, priority, now);
-        return saveAsNewBookingWithCampaignReward.register(
-            customerId, productId, area, campaignCode);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
-        AddNewWaitingList addNewWaitingList =
+        strategy =
             new AddNewWaitingList(
                 campaignEvents, idGenerator, uriBuilder, waitingList, priority, now);
-        return addNewWaitingList.register(customerId, productId, area, campaignCode);
       } else {
-        SaveAsBookingIfAvailable saveAsBookingIfAvailable =
-            new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
-        return saveAsBookingIfAvailable.register(customerId, productId, area, campaignCode);
+        strategy = new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
       }
     }
+    return strategy.register(customerId, productId, area, campaignCode);
   }
 
   interface CampaignApplicationStrategy {
