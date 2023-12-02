@@ -71,8 +71,8 @@ public class WaitingListLogic {
         SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward =
             new SaveAsNewBookingWithCampaignReward(
                 campaignEvents, salesStore, uriBuilder, priority, now);
-        return saveAsNewBookingWithCampaignReward(
-            saveAsNewBookingWithCampaignReward, customerId, productId, area, campaignCode);
+        return saveAsNewBookingWithCampaignReward.saveAsNewBookingWithCampaignReward(
+            customerId, productId, area, campaignCode);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
@@ -139,39 +139,33 @@ public class WaitingListLogic {
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
       @NotNull CampaignPriority priority,
-      @NotNull Instant now) {}
-
-  @NotNull
-  private static URI saveAsNewBookingWithCampaignReward(
-      @NotNull SaveAsNewBookingWithCampaignReward saveAsNewBookingWithCampaignReward,
-      @NotNull CustomerId customerId,
-      @NotNull ProductId productId,
-      @NotNull Area area,
-      @Nullable CampaignCode campaignCode) {
-    // ウェイティングリストが終了している場合は予約として扱う
-    Booking booking =
-        saveAsNewBookingWithCampaignReward
-            .salesStore()
-            .bookPurchaseContract(
-                customerId, productId, area, saveAsNewBookingWithCampaignReward.now());
-    if (campaignCode != null) {
-      CampaignRewardRequest request =
-          new CampaignRewardRequest(
-              productId,
-              Reference.of(Booking.class, booking.getId()),
-              saveAsNewBookingWithCampaignReward.priority(),
-              campaignCode,
-              saveAsNewBookingWithCampaignReward.now());
-      saveAsNewBookingWithCampaignReward.campaignEvents().createCampaignReward(request);
+      @NotNull Instant now) {
+    @NotNull
+    private URI saveAsNewBookingWithCampaignReward(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      // ウェイティングリストが終了している場合は予約として扱う
+      Booking booking = salesStore().bookPurchaseContract(customerId, productId, area, now());
+      if (campaignCode != null) {
+        CampaignRewardRequest request =
+            new CampaignRewardRequest(
+                productId,
+                Reference.of(Booking.class, booking.getId()),
+                priority(),
+                campaignCode,
+                now());
+        campaignEvents().createCampaignReward(request);
+      }
+      return uriBuilder()
+          .name(PRODUCTS)
+          .value(productId)
+          .name("contracts")
+          .name(BOOKINGS)
+          .value(booking.getId())
+          .build();
     }
-    return saveAsNewBookingWithCampaignReward
-        .uriBuilder()
-        .name(PRODUCTS)
-        .value(productId)
-        .name("contracts")
-        .name(BOOKINGS)
-        .value(booking.getId())
-        .build();
   }
 
   record AddNewWaitingList(
