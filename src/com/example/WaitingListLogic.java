@@ -89,6 +89,15 @@ public class WaitingListLogic {
     }
   }
 
+  interface CampaignApplicationStrategy {
+    @NotNull
+    URI register(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode);
+  }
+
   record SaveNewWaitingList(
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
