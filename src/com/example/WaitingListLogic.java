@@ -58,29 +58,37 @@ public class WaitingListLogic {
       throw new IllegalArgumentException(
           "product has no waiting list, id = { productId }, name = { product.getName() }");
     }
+    CampaignApplicationStrategy strategy =
+        getStrategy(productId, area, campaignCode, customer, product);
+    return strategy.register(customerId, productId, area, campaignCode);
+  }
+
+  @NotNull
+  private CampaignApplicationStrategy getStrategy(
+      @NotNull ProductId productId,
+      @NotNull Area area,
+      @Nullable CampaignCode campaignCode,
+      Customer customer,
+      Product product) {
     Instant now = Instant.now(clock);
     CampaignPriority priority =
         campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
     Collection<WaitingList> waitingList = campaignEvents.findWaitingList(productId, area, now);
-    CampaignApplicationStrategy strategy;
     if (waitingList.isEmpty()) {
       if (product.isWaitingListAvailableForArea(area)) {
-        strategy = new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
+        return new SaveNewWaitingList(campaignEvents, idGenerator, uriBuilder, priority, now);
       } else {
-        strategy =
-            new SaveAsNewBookingWithCampaignReward(
-                campaignEvents, salesStore, uriBuilder, priority, now);
+        return new SaveAsNewBookingWithCampaignReward(
+            campaignEvents, salesStore, uriBuilder, priority, now);
       }
     } else {
       if (product.isWaitingListAvailableForArea(area)) {
-        strategy =
-            new AddNewWaitingList(
-                campaignEvents, idGenerator, uriBuilder, waitingList, priority, now);
+        return new AddNewWaitingList(
+            campaignEvents, idGenerator, uriBuilder, waitingList, priority, now);
       } else {
-        strategy = new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
+        return new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
       }
     }
-    return strategy.register(customerId, productId, area, campaignCode);
   }
 
   interface CampaignApplicationStrategy {
