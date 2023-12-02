@@ -19,7 +19,10 @@ public record CampaignApplicationStrategyFactory(
     @NotNull CampaignEvents campaignEvents,
     @NotNull IdGenerator idGenerator,
     @NotNull SalesStore salesStore,
-    @NotNull URIBuilder uriBuilder) {
+    @NotNull URIBuilder uriBuilder)
+    implements com.example.CampaignApplicationStrategyFactory {
+
+  @Override
   @NotNull
   public CampaignApplicationStrategy getStrategy(
       @NotNull Collection<WaitingList> waitingList,
