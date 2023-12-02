@@ -63,8 +63,11 @@ public class WaitingListLogic {
         campaignCode == null ? customer.getPlan().campaignPriority() : campaignCode.getPriority();
     Collection<WaitingList> waitingList =
         campaignEvents.findWaitingList(product.getId(), area, now);
+    CampaignApplicationStrategyFactory campaignApplicationStrategyFactory =
+        new CampaignApplicationStrategyFactory();
     CampaignApplicationStrategy strategy =
         getStrategy(
+            campaignApplicationStrategyFactory,
             campaignEvents,
             idGenerator,
             salesStore,
@@ -78,8 +81,11 @@ public class WaitingListLogic {
     return strategy.register(customerId, productId, area, campaignCode);
   }
 
+  record CampaignApplicationStrategyFactory() {}
+
   @NotNull
   private static CampaignApplicationStrategy getStrategy(
+      @NotNull CampaignApplicationStrategyFactory campaignApplicationStrategyFactory,
       @NotNull CampaignEvents campaignEvents,
       @NotNull IdGenerator idGenerator,
       @NotNull SalesStore salesStore,
