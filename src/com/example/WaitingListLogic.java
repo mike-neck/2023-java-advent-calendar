@@ -83,8 +83,8 @@ public class WaitingListLogic {
       } else {
         SaveAsBookingIfAvailable saveAsBookingIfAvailable =
             new SaveAsBookingIfAvailable(campaignEvents, salesStore, uriBuilder, now);
-        return saveAsBookingIfAvailable(
-            saveAsBookingIfAvailable, customerId, productId, area, campaignCode);
+        return saveAsBookingIfAvailable.saveAsBookingIfAvailable(
+            customerId, productId, area, campaignCode);
       }
     }
   }
@@ -215,41 +215,29 @@ public class WaitingListLogic {
       @NotNull CampaignEvents campaignEvents,
       @NotNull SalesStore salesStore,
       @NotNull URIBuilder uriBuilder,
-      @NotNull Instant now) {}
-
-  @NotNull
-  private static URI saveAsBookingIfAvailable(
-      @NotNull SaveAsBookingIfAvailable saveAsBookingIfAvailable,
-      @NotNull CustomerId customerId,
-      @NotNull ProductId productId,
-      @NotNull Area area,
-      @Nullable CampaignCode campaignCode) {
-    // Waiting List を締め切った場合
-    CampaignRule rule = saveAsBookingIfAvailable.campaignEvents().findRule(productId, area);
-    if (rule != null && rule.acceptsBookingAfterCampaignDeadline()) {
-      Booking booking =
-          saveAsBookingIfAvailable
-              .salesStore()
-              .bookPurchaseContract(customerId, productId, area, saveAsBookingIfAvailable.now());
-      return saveAsBookingIfAvailable
-          .uriBuilder()
-          .name(PRODUCTS)
-          .value(productId)
-          .name("contracts")
-          .name(BOOKINGS)
-          .value(booking.getId())
-          .build();
-    } else {
-      saveAsBookingIfAvailable
-          .campaignEvents()
-          .saveExpiredCampaignApplication(
-              customerId, productId, area, saveAsBookingIfAvailable.now(), campaignCode);
-      return saveAsBookingIfAvailable
-          .uriBuilder()
-          .name(PRODUCTS)
-          .value(productId)
-          .name("expired")
-          .build();
+      @NotNull Instant now) {
+    @NotNull
+    private URI saveAsBookingIfAvailable(
+        @NotNull CustomerId customerId,
+        @NotNull ProductId productId,
+        @NotNull Area area,
+        @Nullable CampaignCode campaignCode) {
+      // Waiting List を締め切った場合
+      CampaignRule rule = campaignEvents().findRule(productId, area);
+      if (rule != null && rule.acceptsBookingAfterCampaignDeadline()) {
+        Booking booking = salesStore().bookPurchaseContract(customerId, productId, area, now());
+        return uriBuilder()
+            .name(PRODUCTS)
+            .value(productId)
+            .name("contracts")
+            .name(BOOKINGS)
+            .value(booking.getId())
+            .build();
+      } else {
+        campaignEvents()
+            .saveExpiredCampaignApplication(customerId, productId, area, now(), campaignCode);
+        return uriBuilder().name(PRODUCTS).value(productId).name("expired").build();
+      }
     }
   }
 }
